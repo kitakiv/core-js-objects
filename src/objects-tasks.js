@@ -17,8 +17,9 @@
  *    shallowCopy({a: 2, b: { a: [1, 2, 3]}}) => {a: 2, b: { a: [1, 2, 3]}}
  *    shallowCopy({}) => {}
  */
-function shallowCopy(/* obj */) {
-  throw new Error('Not implemented');
+function shallowCopy(obj) {
+  const copy = JSON.stringify(obj);
+  return JSON.parse(copy);
 }
 
 /**
@@ -208,8 +209,23 @@ function fromJSON(/* proto, json */) {
  *      { country: 'Russia',  city: 'Saint Petersburg' }
  *    ]
  */
-function sortCitiesArray(/* arr */) {
-  throw new Error('Not implemented');
+function sortCitiesArray(arr) {
+  const sortedArray = arr;
+  sortedArray.sort((a, b) => {
+    if (a.country > b.country) {
+      return 1;
+    }
+    if (a.country === b.country) {
+      if (a.city > b.city) {
+        return 1;
+      }
+      if (a.city < b.city) {
+        return -1;
+      }
+    }
+    return -1;
+  });
+  return sortedArray;
 }
 
 /**
@@ -242,8 +258,23 @@ function sortCitiesArray(/* arr */) {
  *    "Poland" => ["Lodz"]
  *   }
  */
-function group(/* array, keySelector, valueSelector */) {
-  throw new Error('Not implemented');
+function group(array, keySelector, valueSelector) {
+  const map = array.reduce((acc, elem) => {
+    let flag = true;
+    acc.reduce((accom, element, index) => {
+      if (keySelector(elem) === element[0]) {
+        acc[index][1].push(valueSelector(elem));
+        flag = false;
+        return [...accom, 1];
+      }
+      return accom;
+    }, []);
+    if (flag) {
+      return [...acc, [`${keySelector(elem)}`, [`${valueSelector(elem)}`]]];
+    }
+    return acc;
+  }, []);
+  return map;
 }
 
 /**
