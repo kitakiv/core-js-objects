@@ -18,8 +18,8 @@
  *    shallowCopy({}) => {}
  */
 function shallowCopy(obj) {
-  const copy = JSON.stringify(obj);
-  return JSON.parse(copy);
+  const target = {};
+  return Object.assign(target, obj);
 }
 
 /**
@@ -33,8 +33,18 @@ function shallowCopy(obj) {
  *    mergeObjects([{a: 1, b: 2}, {b: 3, c: 5}]) => {a: 1, b: 5, c: 5}
  *    mergeObjects([]) => {}
  */
-function mergeObjects(/* objects */) {
-  throw new Error('Not implemented');
+function mergeObjects(objects) {
+  return objects.reduce((acc, elem) => {
+    const keyObj = Object.entries(elem);
+    keyObj.forEach((keyMas) => {
+      if (acc[keyMas[0]]) {
+        acc[keyMas[0]] += keyMas[1];
+      } else {
+        acc[keyMas[0]] = elem[keyMas[0]];
+      }
+    });
+    return acc;
+  }, {});
 }
 
 /**
@@ -50,8 +60,15 @@ function mergeObjects(/* objects */) {
  *    removeProperties({name: 'John', age: 30, city: 'New York'}, 'age') => {name: 'John', city: 'New York'}
  *
  */
-function removeProperties(/* obj, keys */) {
-  throw new Error('Not implemented');
+function removeProperties(obj, keys) {
+  const copy = obj;
+  const masKey = keys instanceof Array ? keys : [keys];
+  masKey.forEach((key) => {
+    if (copy[key]) {
+      delete copy[key];
+    }
+  });
+  return copy;
 }
 
 /**
@@ -66,8 +83,21 @@ function removeProperties(/* obj, keys */) {
  *    compareObjects({a: 1, b: 2}, {a: 1, b: 2}) => true
  *    compareObjects({a: 1, b: 2}, {a: 1, b: 3}) => false
  */
-function compareObjects(/* obj1, obj2 */) {
-  throw new Error('Not implemented');
+function compareObjects(obj1, obj2) {
+  let keyMas = Object.keys(obj1);
+  if (Object.keys(obj2).length > keyMas.length) {
+    keyMas = Object.keys(obj2);
+  }
+  for (let i = 0; i < keyMas.length; i += 1) {
+    if (
+      !obj1[keyMas[i]] &&
+      !obj2[keyMas[i]] &&
+      !(obj1[keyMas[i]] === obj2[keyMas[i]])
+    ) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /**
@@ -81,8 +111,8 @@ function compareObjects(/* obj1, obj2 */) {
  *    isEmptyObject({}) => true
  *    isEmptyObject({a: 1}) => false
  */
-function isEmptyObject(/* obj */) {
-  throw new Error('Not implemented');
+function isEmptyObject(obj) {
+  return Object.keys(obj).length === 0;
 }
 
 /**
@@ -101,8 +131,8 @@ function isEmptyObject(/* obj */) {
  *    immutableObj.newProp = 'new';
  *    console.log(immutableObj) => {a: 1, b: 2}
  */
-function makeImmutable(/* obj */) {
-  throw new Error('Not implemented');
+function makeImmutable(obj) {
+  return Object.freeze(obj);
 }
 
 /**
@@ -115,8 +145,16 @@ function makeImmutable(/* obj */) {
  *    makeWord({ a: [0, 1], b: [2, 3], c: [4, 5] }) => 'aabbcc'
  *    makeWord({ H:[0], e: [1], l: [2, 3, 8], o: [4, 6], W:[5], r:[7], d:[9]}) => 'HelloWorld'
  */
-function makeWord(/* lettersObject */) {
-  throw new Error('Not implemented');
+function makeWord(lettersObject) {
+  const keyMas = Object.keys(lettersObject);
+  const result = keyMas.reduce((acc, key) => {
+    const indexes = lettersObject[key];
+    indexes.forEach((index) => {
+      acc[index] = `${key}`;
+    });
+    return acc;
+  }, []);
+  return result.join('');
 }
 
 /**
@@ -150,9 +188,13 @@ function sellTickets(/* queue */) {
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  this.width = width;
+  this.height = height;
 }
+Rectangle.prototype.getArea = function area() {
+  return this.height * this.width;
+};
 
 /**
  * Returns the JSON representation of specified object
@@ -164,8 +206,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 /**
@@ -179,8 +221,10 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  let obj = JSON.parse(json);
+  obj = Object.create(proto, obj);
+  return obj;
 }
 
 /**
