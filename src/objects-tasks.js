@@ -89,11 +89,7 @@ function compareObjects(obj1, obj2) {
     keyMas = Object.keys(obj2);
   }
   for (let i = 0; i < keyMas.length; i += 1) {
-    if (
-      !obj1[keyMas[i]] &&
-      !obj2[keyMas[i]] &&
-      !(obj1[keyMas[i]] === obj2[keyMas[i]])
-    ) {
+    if (obj1[keyMas[i]] !== obj2[keyMas[i]]) {
       return false;
     }
   }
@@ -171,8 +167,34 @@ function makeWord(lettersObject) {
  *    sellTickets([25, 25, 50]) => true
  *    sellTickets([25, 100]) => false (The seller does not have enough money to give change.)
  */
-function sellTickets(/* queue */) {
-  throw new Error('Not implemented');
+function sellTickets(queue) {
+  const mas = [];
+  for (let money = 0; money < queue.length; money += 1) {
+    if (queue[money] === 25) {
+      mas.push(25);
+    } else if (queue[money] === 50) {
+      if (mas.includes(25)) {
+        mas.splice(mas.indexOf(25), 1, 50);
+      } else {
+        return false;
+      }
+    } else if (queue[money] === 100) {
+      if (mas.includes(25) && mas.includes(25)) {
+        mas.splice(mas.indexOf(50), 1);
+        mas.splice(mas.indexOf(25), 1, 100);
+      }
+      if (mas.includes(25) && mas.indexOf(25) !== mas.lastIndexOf(25)) {
+        mas.splice(mas.indexOf(25), 1);
+        if (mas.includes(25) && mas.indexOf(25) !== mas.lastIndexOf(25)) {
+          mas.splice(mas.indexOf(25), 1);
+          mas.splice(mas.indexOf(25), 1, 100);
+        }
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 /**
@@ -223,7 +245,7 @@ function getJSON(obj) {
  */
 function fromJSON(proto, json) {
   let obj = JSON.parse(json);
-  obj = Object.create(proto, obj);
+  obj = Object.setPrototypeOf(obj, proto);
   return obj;
 }
 
@@ -402,6 +424,10 @@ const cssSelectorBuilder = {
 
   combine(/* selector1, combinator, selector2 */) {
     throw new Error('Not implemented');
+  },
+
+  stringify() {
+    return 'hellow';
   },
 };
 
