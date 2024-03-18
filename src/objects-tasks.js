@@ -398,36 +398,142 @@ function group(array, keySelector, valueSelector) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  result: '',
+  elementCount: 0,
+  idCount: 0,
+  pseudoCount: 0,
+  rightOrder: ['el', 'id', 'cl', 'att', 'ps-cl', 'ps-el'],
+  order: [],
+
+  element(value) {
+    if (this.elementCount > 0) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector" if element, id or pseudo-element occurs twice or more times'
+      );
+    }
+    const newObj = Object.create(cssSelectorBuilder);
+    newObj.result = `${this.result}${value}`;
+    newObj.order = [...this.order, 'el'];
+    newObj.elementCount = 1;
+    const m = this.check(newObj.order, this.rightOrder);
+    if (!m) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    return newObj;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    if (this.idCount > 0) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector" if element, id or pseudo-element occurs twice or more times'
+      );
+    }
+    const newObj = Object.create(cssSelectorBuilder);
+    newObj.result = `${this.result}#${value}`;
+    newObj.order = [...this.order, 'id'];
+    newObj.idCount = 1;
+    const m = this.check(newObj.order, this.rightOrder);
+    if (!m) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    return newObj;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const newObj = Object.create(cssSelectorBuilder);
+    newObj.result = `${this.result}.${value}`;
+    newObj.order = [...this.order, 'cl'];
+    const m = this.check(newObj.order, this.rightOrder);
+    if (!m) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    return newObj;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const newObj = Object.create(cssSelectorBuilder);
+    newObj.result = `${this.result}[${value}]`;
+    newObj.order = [...this.order, 'att'];
+    const m = this.check(newObj.order, this.rightOrder);
+    if (!m) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    return newObj;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const newObj = Object.create(cssSelectorBuilder);
+    newObj.result = `${this.result}:${value}`;
+    newObj.order = [...this.order, 'ps-cl'];
+    const m = this.check(newObj.order, this.rightOrder);
+    if (!m) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    return newObj;
+  },
+  pseudoElement(value) {
+    if (this.pseudoCount > 0) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector" if element, id or pseudo-element occurs twice or more times'
+      );
+    }
+    const newObj = Object.create(cssSelectorBuilder);
+    newObj.result = `${this.result}::${value}`;
+    newObj.order = [...this.order, 'ps-el'];
+    newObj.pseudoCount = 1;
+    const m = this.check(newObj.order, this.rightOrder);
+    if (!m) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    return newObj;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
-  },
-
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    const newObj = Object.create(cssSelectorBuilder);
+    newObj.result = `${selector1.result} ${combinator} ${selector2.result}`;
+    return newObj;
   },
 
   stringify() {
-    return 'hellow';
+    const resultReturn = this.result;
+    this.result = '';
+    this.elementCount = 0;
+    this.idCount = 0;
+    this.pseudoCount = 0;
+    this.order = [];
+    return resultReturn;
+  },
+
+  check(fir, right) {
+    let answer = true;
+    const mas = [];
+    const el = [];
+    for (let i = 0; i < right.length; i += 1) {
+      if (fir.includes(right[i])) {
+        mas.push(right[i]);
+      }
+    }
+    for (let i = 0; i < fir.length; i += 1) {
+      if (!el.includes(fir[i])) {
+        el.push(fir[i]);
+      } else if (el[el.length - 1] !== fir[i]) {
+        answer = false;
+        return answer;
+      }
+    }
+    return mas.join('') === el.join('');
   },
 };
 
